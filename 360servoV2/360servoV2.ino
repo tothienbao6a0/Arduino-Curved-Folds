@@ -97,7 +97,7 @@ void loop()
     while(analogRead(analogOutPin)>=200){
     myservo.write(clockwiseSpeed);
     }
-    myservo.write(NEUTRAL_POSITION);
+    myservo.write(stopSpeed);
     //delay(350);
     moves++;
     Serial.println("Moved Left");
@@ -113,7 +113,7 @@ void loop()
     {
     myservo.write(counterclockwiseSpeed);
     }
-    myservo.write(NEUTRAL_POSITION);
+    myservo.write(stopSpeed);
     //delay(350);
     moves++;
     Serial.println("Moved Right");
