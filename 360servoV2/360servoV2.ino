@@ -10,7 +10,7 @@ const int clockwiseSpeed = 20;
 const int counterclockwiseSpeed = 180;
 const int stopSpeed = 100;
 
-boolean moveCompleted=false;
+boolean actuationCompleted=false;
 int moves=0;
 enum enumerator {
   NEUTRALIZING,
@@ -88,14 +88,20 @@ void loop()
   {
     delay(2000);
     stage = LEFT;
+    Serial.println("Start Actuating");
+
   }
 
   if (stage == LEFT)
   {
+    while(analogRead(analogOutPin)>=200){
     myservo.write(clockwiseSpeed);
-    delay(350);
+    }
+    myservo.write(NEUTRAL_POSITION);
+    //delay(350);
     moves++;
-    if (moveCompleted == false) //tell it to move right or stop moving
+    Serial.println("Moved Left");
+    if (actuationCompleted == false) //tell it to move right or stop moving
       stage = RIGHT;
     else
       stage = DONE_MOVING;
@@ -103,10 +109,15 @@ void loop()
 
   if (stage == RIGHT)
   {
+    while(analogRead(analogOutPin)<=400)
+    {
     myservo.write(counterclockwiseSpeed);
-    delay(350);
+    }
+    myservo.write(NEUTRAL_POSITION);
+    //delay(350);
     moves++;
-    if (moveCompleted == false) //tell it to move left or stop moving
+    Serial.println("Moved Right");
+    if (actuationCompleted == false) //tell it to move left or stop moving
       stage = LEFT;
     else
       stage = DONE_MOVING;
@@ -128,9 +139,9 @@ void loop()
   if (moves>50)
   {
 
-    moveCompleted=true;
+    actuationCompleted=true;
    
   }
   else if (moves<=50)
-  moveCompleted=false;
+  actuationCompleted=false;
 }
