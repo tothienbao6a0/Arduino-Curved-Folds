@@ -1,2 +1,2 @@
-# Arduino-Curved-Folds
-Servo Code for Curved Folds 
+# Origami-Curved-Folds
+Servo Code for Curved Folds project
