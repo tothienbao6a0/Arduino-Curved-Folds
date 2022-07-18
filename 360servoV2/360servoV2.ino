@@ -3,15 +3,20 @@
 Servo myservo;
 //LOOK AT THE NOTES DR.SUNG WROTE IN THE NOTEBOOK FOR STATE MACHINE!!
 int FOLDED_POSITION = 300;
-int NEUTRAL_POSITION = 8;
+int NEUTRAL_POSITION = 0;
+int LEFT_POSITION = 150;
+int RIGHT_POSITION = 350;
 const int DIGITAL_PIN = 9;
 const int analogOutPin = A3;
-const int clockwiseSpeed = 20;
-const int counterclockwiseSpeed = 180;
+const int clockwiseSpeed = 0;
+const int counterclockwiseSpeed = 200;
 const int stopSpeed = 100;
-
-boolean actuationCompleted=false;
-int moves=0;
+int POS_RECORD_1 = 0;
+int POS_RECORD_2 = 0;
+int POS_RECORD_3 = 0;
+int POS_PRECISE = 0;
+boolean actuationCompleted = false;
+int moves = 0;
 enum enumerator {
   NEUTRALIZING,
   FOLDING,
@@ -21,7 +26,8 @@ enum enumerator {
   DONE_MOVING,
   DONE
 };
-
+int location;
+int location2;
 enumerator stage = NEUTRALIZING;
 
 
@@ -31,8 +37,10 @@ void setup()
   // put your setup code here, to run once:
   Serial.begin(9600);
   myservo.attach(DIGITAL_PIN);
+  myservo.write(stopSpeed);
   delay(2000);
   enumerator stage = NEUTRALIZING;
+  Serial.println("start");
 
 }
 
@@ -41,52 +49,46 @@ void loop()
   // put your main code here, to run repeatedly:
   if (stage == NEUTRALIZING)
   {
-    if (analogRead(analogOutPin) != NEUTRAL_POSITION - 8 )
+    location2 = readAnalog();
+    Serial.println("entering neutralizing stage");
+    if (location2 <= 450)
     {
-      if (analogRead(analogOutPin) <= 450)
-        myservo.write(clockwiseSpeed);
-      else
-        myservo.write(counterclockwiseSpeed);
-      //          returnToUnwind();
+      moveToPosition(NEUTRAL_POSITION , "clockwise",30,30);
+      delay(100);
+      myservo.write(100);
+      //delay(2000);
     }
     else
     {
+      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30,30);
+      delay(100);
       myservo.write(100);
-      Serial.println("Neutralized");
-      Serial.print("\t Analog at NEUTRAL = ");
-      Serial.println(analogRead(analogOutPin));
-      delay(1000);
-      stage = FOLDING;
+      //delay(2000);
     }
+    Serial.println("Neutralized");
+    Serial.print("\t Stopped at NEUTRAL analog = ");
+    Serial.println(analogRead(analogOutPin));
+    delay(4000);
+    stage = FOLDING;
+    //myservo.write(stopSpeed);
+
   }
 
   if (stage == FOLDING)
   {
-    if (analogRead(analogOutPin) != FOLDED_POSITION - 50)
-    {
-      myservo.write(counterclockwiseSpeed);
 
-    }
-
-    if (analogRead(analogOutPin) > FOLDED_POSITION) //THIS MIGHT BE AN ISSUE
-    {
-      myservo.write(clockwiseSpeed);
-    }
-
-    if (analogRead(analogOutPin) == FOLDED_POSITION)
-    {
-      myservo.write(100);
-      Serial.println("Folded");
-      Serial.print("\t Analog at Folded= ");
-      Serial.println(analogRead(analogOutPin));
-      delay(2000);
-      stage = FOLDED;
-    }
+    moveToPosition(FOLDED_POSITION - 50, "counterclockwise",50,50);
+    myservo.write(stopSpeed);
+    Serial.println("Folded");
+    Serial.print("\t Analog at Folded= ");
+    Serial.println(analogRead(analogOutPin));
+    //delay(5000);
+    stage = FOLDED;
   }
 
   if (stage == FOLDED)
   {
-    delay(2000);
+    //delay(2000);
     stage = LEFT;
     Serial.println("Start Actuating");
 
@@ -94,30 +96,30 @@ void loop()
 
   if (stage == LEFT)
   {
-    while(analogRead(analogOutPin)>=200){
-    myservo.write(clockwiseSpeed);
-    }
+
+
+    moveToPosition(LEFT_POSITION, "clockwise",50,50);
     myservo.write(stopSpeed);
-    //delay(350);
+    Serial.println("moved Left");
     moves++;
-    Serial.println("Moved Left");
+    //delay(2000);
     if (actuationCompleted == false) //tell it to move right or stop moving
       stage = RIGHT;
     else
       stage = DONE_MOVING;
+
   }
 
   if (stage == RIGHT)
   {
-    while(analogRead(analogOutPin)<=400)
-    {
-    myservo.write(counterclockwiseSpeed);
-    }
+
+    moveToPosition(RIGHT_POSITION, "counterclockwise", 50,50);
     myservo.write(stopSpeed);
-    //delay(350);
+    Serial.println("moved right");
     moves++;
-    Serial.println("Moved Right");
-    if (actuationCompleted == false) //tell it to move left or stop moving
+    
+    //delay(2000);
+    if (actuationCompleted == false) //tell it to move right or stop moving
       stage = LEFT;
     else
       stage = DONE_MOVING;
@@ -125,23 +127,76 @@ void loop()
 
   if (stage == DONE_MOVING)
   {
-    stage =DONE;  //ADD CODE HERE!!!!
-
+    stage = DONE; //ADD CODE HERE!!!!
+    delay(2000);
   }
   if (stage == DONE)
   {
+    moveToPosition(NEUTRAL_POSITION, "clockwise",30,30);
+    delay(100);
     myservo.write(stopSpeed);
-    moves=0;
+    moves = 0;
     Serial.println("Process Done!");
-
+    delay(2000);
   }
 
-  if (moves>50)
+  if (moves > 100)
   {
 
-    actuationCompleted=true;
-   
+    actuationCompleted = true;
+
   }
-  else if (moves<=50)
-  actuationCompleted=false;
+  else if (moves <= 50)
+    actuationCompleted = false;
+}
+
+
+void moveToPosition(int positionValue, String rotationDirection, int errorRange1, int errorRange2)
+{
+  location = readAnalog();
+  while (location < positionValue - errorRange1 || location > positionValue + errorRange2)
+  {
+    if (rotationDirection.equals("clockwise"))
+    {
+      //delay(100);
+      location = readAnalog();
+      myservo.write(clockwiseSpeed);
+      Serial.println("ROTATING CLOCKWISE");
+    }
+    if (rotationDirection.equals("counterclockwise"))
+    {
+      location = readAnalog();
+      myservo.write(counterclockwiseSpeed);
+      Serial.println("ROTATING COUNTERCLOCKWISE");
+    }
+    location = readAnalog();
+    //delay(100);
+  }
+  //delay(100);
+  //myservo.write(stopSpeed);
+
+}
+
+int readAnalog() {
+  POS_RECORD_1 = analogRead(analogOutPin);
+  Serial.println(POS_RECORD_1);
+  //delay(5);
+  POS_RECORD_2 = analogRead(analogOutPin);
+  Serial.println(POS_RECORD_2);
+  //delay(5);
+  POS_RECORD_3 = analogRead(analogOutPin);
+  Serial.println(POS_RECORD_3);
+  //delay(5);
+
+  if (POS_RECORD_1 >= POS_RECORD_2 && POS_RECORD_1 >= POS_RECORD_3 && POS_RECORD_1 <= 450)
+    POS_PRECISE = POS_RECORD_1;
+
+  else if (POS_RECORD_2 >= POS_RECORD_1 && POS_RECORD_2 >= POS_RECORD_3 && POS_RECORD_2 <= 450)
+    POS_PRECISE = POS_RECORD_2;
+
+  else if (POS_RECORD_3 >= POS_RECORD_2 && POS_RECORD_3 >= POS_RECORD_1 && POS_RECORD_3 <= 450)
+    POS_PRECISE = POS_RECORD_3;
+  Serial.println("analog Captured");
+  
+  return POS_PRECISE;
 }
