@@ -21,6 +21,7 @@ enum enumerator {
   NEUTRALIZING,
   FOLDING,
   FOLDED,
+  CENTRALISE, 
   LEFT,
   RIGHT,
   DONE_MOVING,
@@ -49,7 +50,7 @@ void loop()
   // put your main code here, to run repeatedly:
   if (stage == NEUTRALIZING)
   {
-    location2 = readAnalog();
+    location2 = analogRead(analogOutPin);
     Serial.println("entering neutralizing stage");
     if (location2 <= 450)
     {
@@ -93,7 +94,7 @@ void loop()
     Serial.println("Start Actuating");
 
   }
-
+  
   if (stage == LEFT)
   {
 
@@ -102,8 +103,14 @@ void loop()
     myservo.write(stopSpeed);
     Serial.println("moved Left");
     moves++;
+    if (moves >= 10 && moves <=20)
+    {
+      moveToPosition(FOLDED_POSITION-50, "counterclockwise", 30,30);
+      myservo.write(stopSpeed);
+      Serial.println("movedToCenter");
+    }
     //delay(2000);
-    if (actuationCompleted == false) //tell it to move right or stop moving
+    else if (actuationCompleted == false) //tell it to move right or stop moving
       stage = RIGHT;
     else
       stage = DONE_MOVING;
@@ -119,7 +126,13 @@ void loop()
     moves++;
     
     //delay(2000);
-    if (actuationCompleted == false) //tell it to move right or stop moving
+    if (moves > 20 && moves <=30)
+    {
+      moveToPosition(FOLDED_POSITION-50, "clockwise", 30,30);
+      myservo.write(stopSpeed);
+      Serial.println("movedToCenter");
+    }
+    else if (actuationCompleted == false) //tell it to move right or stop moving
       stage = LEFT;
     else
       stage = DONE_MOVING;
@@ -132,15 +145,17 @@ void loop()
   }
   if (stage == DONE)
   {
-    moveToPosition(NEUTRAL_POSITION, "clockwise",30,30);
+    moveToPosition(NEUTRAL_POSITION, "clockwise",50,50);
     delay(100);
     myservo.write(stopSpeed);
     moves = 0;
     Serial.println("Process Done!");
-    delay(2000);
+    delay(5000);
+    stage = FOLDING; 
+    moves = 0; 
   }
 
-  if (moves > 100)
+  if (moves > 50)
   {
 
     actuationCompleted = true;
