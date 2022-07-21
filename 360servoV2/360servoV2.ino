@@ -52,16 +52,17 @@ void loop()
   {
     location2 = analogRead(analogOutPin);
     Serial.println("entering neutralizing stage");
-    if (location2 <= 450)
+   /* if (location2 <= 400)
     {
-      moveToPosition(NEUTRAL_POSITION , "clockwise",30,30);
+      moveToPosition(10, "clockwise",0,40);
       delay(100);
       myservo.write(100);
+      
       //delay(2000);
-    }
-    else
+    }*/
+    //else
     {
-      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30,30);
+      moveToPosition(NEUTRAL_POSITION , "counterclockwise",0,40);
       delay(100);
       myservo.write(100);
       //delay(2000);
@@ -99,7 +100,7 @@ void loop()
   {
 
 
-    moveToPosition(LEFT_POSITION, "clockwise",50,50);
+    moveToPosition(LEFT_POSITION, "clockwise",70,55);
     myservo.write(stopSpeed);
     Serial.println("moved Left");
     moves++;
@@ -120,7 +121,7 @@ void loop()
   if (stage == RIGHT)
   {
 
-    moveToPosition(RIGHT_POSITION, "counterclockwise", 50,50);
+    moveToPosition(RIGHT_POSITION, "counterclockwise", 55,70);
     myservo.write(stopSpeed);
     Serial.println("moved right");
     moves++;
