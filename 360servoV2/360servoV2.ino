@@ -2,10 +2,10 @@
 #include <Arduino.h>
 Servo myservo;
 //LOOK AT THE NOTES DR.SUNG WROTE IN THE NOTEBOOK FOR STATE MACHINE!!
-int FOLDED_POSITION = 300;
-int NEUTRAL_POSITION = 0;
-int LEFT_POSITION = 150;
-int RIGHT_POSITION = 350;
+int FOLDED_POSITION = 310;
+int NEUTRAL_POSITION = 60;
+int LEFT_POSITION = 210;
+int RIGHT_POSITION = 410;
 const int DIGITAL_PIN = 9;
 const int analogOutPin = A3;
 const int clockwiseSpeed = 0;
@@ -62,7 +62,7 @@ void loop()
     }*/
     //else
     {
-      moveToPosition(NEUTRAL_POSITION , "counterclockwise",0,40);
+      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30,30);
       delay(100);
       myservo.write(100);
       //delay(2000);
@@ -79,7 +79,7 @@ void loop()
   if (stage == FOLDING)
   {
 
-    moveToPosition(FOLDED_POSITION - 50, "counterclockwise",50,50);
+    moveToPosition(FOLDED_POSITION, "counterclockwise",50,50);
     myservo.write(stopSpeed);
     Serial.println("Folded");
     Serial.print("\t Analog at Folded= ");
@@ -106,7 +106,7 @@ void loop()
     moves++;
     if (moves >= 10 && moves <=20)
     {
-      moveToPosition(FOLDED_POSITION-50, "counterclockwise", 30,30);
+      moveToPosition(FOLDED_POSITION, "counterclockwise", 30,30);
       myservo.write(stopSpeed);
       Serial.println("movedToCenter");
     }
@@ -129,7 +129,7 @@ void loop()
     //delay(2000);
     if (moves > 20 && moves <=30)
     {
-      moveToPosition(FOLDED_POSITION-50, "clockwise", 30,30);
+      moveToPosition(FOLDED_POSITION, "clockwise", 30,30);
       myservo.write(stopSpeed);
       Serial.println("movedToCenter");
     }
