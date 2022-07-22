@@ -192,14 +192,14 @@ void moveToPosition(int positionValue, String rotationDirection, int errorRange1
       location = readAnalog();
       myservo.write(clockwiseSpeed);
       Serial.println("ROTATING CLOCKWISE");
-      if (location >=370||location<=10 ) //Here is the issue
+      if (location >=370 && location<=450&&stage!=NEUTRALIZING) //Here is the issue
       {
       myservo.write(counterclockwiseSpeed);
       //delay(100);
       Serial.println("STOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOP");
-      delay(500);
+      delay(300);
       //location = readAnalog();
-      
+      //break;
       }
     }
     if (rotationDirection.equals("counterclockwise"))
@@ -207,13 +207,13 @@ void moveToPosition(int positionValue, String rotationDirection, int errorRange1
       location = readAnalog();
       myservo.write(counterclockwiseSpeed);
       Serial.println("ROTATING COUNTERCLOCKWISE");
-      if (location >=370||location<=10)
+      if (location >=370&&location<=430&&stage!=NEUTRALIZING)
       {
       myservo.write(clockwiseSpeed);
       Serial.println("STOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOPSTOP");
-      delay(500);
+      delay(300);
       //location = readAnalog();
-      
+      //break;
       }
     }
     location = readAnalog();
