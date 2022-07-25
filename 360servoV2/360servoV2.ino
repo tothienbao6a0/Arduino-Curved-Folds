@@ -4,8 +4,8 @@ Servo myservo;
 //LOOK AT THE NOTES DR.SUNG WROTE IN THE NOTEBOOK FOR STATE MACHINE!!
 int FOLDED_POSITION = 310;
 int NEUTRAL_POSITION = 60;
-int LEFT_POSITION = 210;
-int RIGHT_POSITION = 410;
+int LEFT_POSITION = 180;
+int RIGHT_POSITION = 440;
 const int DIGITAL_PIN = 9;
 const int analogOutPin = A3;
 const int clockwiseSpeed = 0;
@@ -40,7 +40,7 @@ void setup()
   myservo.attach(DIGITAL_PIN);
   myservo.write(stopSpeed);
   delay(2000);
-  enumerator stage = NEUTRALIZING;
+  enumerator stage = FOLDED;
   Serial.println("start");
 
 }
@@ -104,7 +104,7 @@ void loop()
     myservo.write(stopSpeed);
     Serial.println("moved Left");
     moves++;
-    if (moves >= 10 && moves <=20)
+    if (moves >= 40 && moves <=50)
     {
       moveToPosition(FOLDED_POSITION, "counterclockwise", 30,30);
       myservo.write(stopSpeed);
@@ -127,7 +127,7 @@ void loop()
     moves++;
     
     //delay(2000);
-    if (moves > 20 && moves <=30)
+    if (moves > 50 && moves <=60)
     {
       moveToPosition(FOLDED_POSITION, "clockwise", 30,30);
       myservo.write(stopSpeed);
@@ -156,7 +156,7 @@ void loop()
     moves = 0; 
   }
 
-  if (moves > 50)
+  if (moves > 70)
   {
 
     actuationCompleted = true;
