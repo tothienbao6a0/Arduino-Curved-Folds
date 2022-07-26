@@ -1,23 +1,26 @@
 #include <Servo.h>
 #include <Arduino.h>
 Servo myservo;
-//LOOK AT THE NOTES DR.SUNG WROTE IN THE NOTEBOOK FOR STATE MACHINE!!
-int FOLDED_POSITION = 310;
-int NEUTRAL_POSITION = 60;
-int LEFT_POSITION = 180;
-int RIGHT_POSITION = 440;
+//digital pin controls the velocity
+//analog pin shows the position of the servo 
+//therefore, to move from one position to another, the move function must designates the desired analog value, the rotation position, and the error range to help check for accurate movement
+
+int FOLDED_POSITION = 310;// position where it is folded
+int NEUTRAL_POSITION = 60; // position where it is unfolded
+int LEFT_POSITION = 180; //position to tell the horn to move left from folded position
+int RIGHT_POSITION = 440; //position to tell the horn to move right from folded position
 const int DIGITAL_PIN = 9;
-const int analogOutPin = A3;
-const int clockwiseSpeed = 0;
-const int counterclockwiseSpeed = 200;
-const int stopSpeed = 100;
-int POS_RECORD_1 = 0;
+const int analogOutPin = A3; //analog Pin is the pin that shows the position of the servo horn. It is NOT from 0 to 1023, but rather 0 to around 500
+const int clockwiseSpeed = 0; //speed input in the digital Pin so that the horn turns clockwise
+const int counterclockwiseSpeed = 200; //speed input in the digital Pin so that the horn turns counterclockwise
+const int stopSpeed = 100; //speed input in the digital Pin so that the horn stops
+int POS_RECORD_1 = 0; // these are the three values that will help the arduino check for the analog position more accurately 
 int POS_RECORD_2 = 0;
 int POS_RECORD_3 = 0;
-int POS_PRECISE = 0;
+int POS_PRECISE = 0; //this is a close estimate for the actual analogValue that will be used to check for position in the code to switch between states
 boolean actuationCompleted = false;
 int moves = 0;
-enum enumerator {
+enum enumerator { //state machine to run through the process. 
   NEUTRALIZING,
   FOLDING,
   FOLDED,
@@ -40,8 +43,9 @@ void setup()
   myservo.attach(DIGITAL_PIN);
   myservo.write(stopSpeed);
   delay(2000);
-  enumerator stage = FOLDED;
+  enumerator stage = NEUTRALIZING; //beginning state that can be changed to check
   Serial.println("start");
+
 
 }
 
@@ -62,7 +66,7 @@ void loop()
     }*/
     //else
     {
-      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30,30);
+      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30,30); //always move counter clockwise to the neutral position at the beginning
       delay(100);
       myservo.write(100);
       //delay(2000);
@@ -76,10 +80,10 @@ void loop()
 
   }
 
-  if (stage == FOLDING)
+  if (stage == FOLDING) // state the folding state
   {
 
-    moveToPosition(FOLDED_POSITION, "counterclockwise",50,50);
+    moveToPosition(FOLDED_POSITION, "counterclockwise",50,50); //move to the counter clockwise to the folded position from the unfolded position
     myservo.write(stopSpeed);
     Serial.println("Folded");
     Serial.print("\t Analog at Folded= ");
@@ -88,7 +92,7 @@ void loop()
     stage = FOLDED;
   }
 
-  if (stage == FOLDED)
+  if (stage == FOLDED)//if the robot is folded, start actuating
   {
     //delay(2000);
     stage = LEFT;
@@ -96,15 +100,15 @@ void loop()
 
   }
   
-  if (stage == LEFT)
+  if (stage == LEFT) 
   {
 
 
-    moveToPosition(LEFT_POSITION, "clockwise",70,55);
+    moveToPosition(LEFT_POSITION, "clockwise",70,55); //move to left pos
     myservo.write(stopSpeed);
     Serial.println("moved Left");
     moves++;
-    if (moves >= 40 && moves <=50)
+    if (moves >= 40 && moves <=50) //testing range for left actuation
     {
       moveToPosition(FOLDED_POSITION, "counterclockwise", 30,30);
       myservo.write(stopSpeed);
@@ -118,7 +122,7 @@ void loop()
 
   }
 
-  if (stage == RIGHT)
+  if (stage == RIGHT) 
   {
 
     moveToPosition(RIGHT_POSITION, "counterclockwise", 55,70);
@@ -127,7 +131,7 @@ void loop()
     moves++;
     
     //delay(2000);
-    if (moves > 50 && moves <=60)
+    if (moves > 50 && moves <=60) //testing range for right actuation
     {
       moveToPosition(FOLDED_POSITION, "clockwise", 30,30);
       myservo.write(stopSpeed);
@@ -141,12 +145,12 @@ void loop()
 
   if (stage == DONE_MOVING)
   {
-    stage = DONE; //ADD CODE HERE!!!!
+    stage = DONE; //if done_moving, done
     delay(2000);
   }
   if (stage == DONE)
   {
-    moveToPosition(NEUTRAL_POSITION, "clockwise",50,50);
+    moveToPosition(NEUTRAL_POSITION, "clockwise",50,50); //move clockwise to neutral positon to return to unfolded state
     delay(100);
     myservo.write(stopSpeed);
     moves = 0;
@@ -156,7 +160,7 @@ void loop()
     moves = 0; 
   }
 
-  if (moves > 70)
+  if (moves > 70) //if moved more than 70 times, return to neutral position
   {
 
     actuationCompleted = true;
@@ -168,21 +172,22 @@ void loop()
 
 
 void moveToPosition(int positionValue, String rotationDirection, int errorRange1, int errorRange2)
-{
-  location = readAnalog();
+{//this is the main function to move to a designated position as called in the state machine
+  //the error range is so that in the case the analog Read is not updated fast enough, the servo horn can still stop around the designated position as noted in the function
+  location = readAnalog(); //update location of servo horn using analog reader
   while (location < positionValue - errorRange1 || location > positionValue + errorRange2)
   {
     if (rotationDirection.equals("clockwise"))
     {
       //delay(100);
       location = readAnalog();
-      myservo.write(clockwiseSpeed);
+      myservo.write(clockwiseSpeed); //if rotating clockwise set digital pin to clockwise value
       Serial.println("ROTATING CLOCKWISE");
     }
     if (rotationDirection.equals("counterclockwise"))
     {
       location = readAnalog();
-      myservo.write(counterclockwiseSpeed);
+      myservo.write(counterclockwiseSpeed); //if rotating counterclockwise set digital pin to counterclockwise value
       Serial.println("ROTATING COUNTERCLOCKWISE");
     }
     location = readAnalog();
@@ -193,8 +198,8 @@ void moveToPosition(int positionValue, String rotationDirection, int errorRange1
 
 }
 
-int readAnalog() {
-  POS_RECORD_1 = analogRead(analogOutPin);
+int readAnalog() { //this is the function to check and return a more accurate value to get rid of the noise (faulty read values) from the reader. 
+  POS_RECORD_1 = analogRead(analogOutPin);//read constantly 3 times
   Serial.println(POS_RECORD_1);
   //delay(5);
   POS_RECORD_2 = analogRead(analogOutPin);
@@ -214,5 +219,5 @@ int readAnalog() {
     POS_PRECISE = POS_RECORD_3;
   Serial.println("analog Captured");
   
-  return POS_PRECISE;
+  return POS_PRECISE;//return a "precise" (more precise) position
 }
