@@ -1,0 +1,44 @@
+#include <Servo.h>
+
+Servo myservo;  // create servo object to control a servo
+// twelve servo objects can be created on most boards
+
+int pos = 0;    // variable to store the servo position
+const int PULL_OFFSET = 45;
+const int STEP_SIZE = 5;
+const int DELAY_MS = 5000;
+const int PAUSE_BETWEEN_MOTIONS_MS = 5000;
+int NEUTRAL_ANALOG = 300;
+int UNFOLDED_ANALOG = 900;
+const int NEUTRAL_SPEED = 100;
+const int DIGITAL_PIN = 9;
+const int analogOutPin = A3;
+boolean calibrated = false;
+int analogPos = 0;
+boolean turnDir;
+int analogReal = 0; //max value for analog which is the true value
+
+int BEGIN_calibrationVar = 1;
+int END_calibrationVar = 1;
+
+void setup()
+{
+
+  Serial.begin(9600);
+  myservo.attach(DIGITAL_PIN);  // attaches the servo on pin 9 to the servo object
+  
+  delay(200);
+
+
+}
+
+void loop()
+
+{
+  Serial.print("Digital = ");
+  //myservo.write(20);
+  Serial.print("\t Analog = ");
+  Serial.println(analogRead(analogOutPin));
+  delay(200);
+  
+}
