@@ -5,9 +5,9 @@ Servo myservo;
 //analog pin shows the position of the servo 
 //therefore, to move from one position to another, the move function must designates the desired analog value, the rotation position, and the error range to help check for accurate movement
 //translate from 0 to 478 to 0 to 360
-int NEUTRAL_POSITION = 45;//position where it is unfolded (can be changed)
-int PULL_OFFSET = 90;//how much it actuates in each direction during the folded state
-int FOLDED_POSITION = NEUTRAL_POSITION+280;//position where it is folded
+int NEUTRAL_POSITION = 33.89;//position where it is unfolded (can be changed)
+int PULL_OFFSET = 67.78;//how much it actuates in each direction during the folded state
+int FOLDED_POSITION = NEUTRAL_POSITION+210.87;//position where it is folded
 int LEFT_POSITION = FOLDED_POSITION-PULL_OFFSET;//position where it is actuating to the left
 int RIGHT_POSITION = FOLDED_POSITION+PULL_OFFSET;//position where it is actuating to the right
 const int DIGITAL_PIN = 9;
@@ -171,14 +171,14 @@ void loop()
 }
 
 
-void moveToPosition(int positionValue, String rotationDirection, int errorRange1)
+void moveToPosition(float positionValue, String rotationDirection, int errorRange1)
 {//this is the main function to move to a designated position as called in the state machine
   //the error range is so that in the case the analog Read is not updated fast enough, the servo horn can still stop around the designated position as noted in the function
   location = readAnalog(); //update location of servo horn using analog reader
 
   if (rotationDirection.equals("clockwise"))
   {
-      while(readAnalog() > positionValue+errorRange1)
+      while(readAnalog() > ((positionValue/360)*478)+errorRange1)
         {
          // location = readAnalog();
           myservo.write(clockwiseSpeed);
@@ -190,7 +190,7 @@ void moveToPosition(int positionValue, String rotationDirection, int errorRange1
 
   if (rotationDirection.equals("counterclockwise"))
   {
-      while(readAnalog() < positionValue-errorRange1)
+      while(readAnalog() < ((positionValue/360)*478)-errorRange1)
         {
         //  location = readAnalog();
           myservo.write(counterclockwiseSpeed);
