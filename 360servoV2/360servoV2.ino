@@ -5,10 +5,11 @@ Servo myservo;
 //analog pin shows the position of the servo 
 //therefore, to move from one position to another, the move function must designates the desired analog value, the rotation position, and the error range to help check for accurate movement
 
-int FOLDED_POSITION = 310;// position where it is folded
-int NEUTRAL_POSITION = 60; // position where it is unfolded
-int LEFT_POSITION = 180; //position to tell the horn to move left from folded position
-int RIGHT_POSITION = 440; //position to tell the horn to move right from folded position
+int NEUTRAL_POSITION = 45;//position where it is unfolded (can be changed)
+int PULL_OFFSET = 110;//how much it actuates in each direction during the folded state
+int FOLDED_POSITION = NEUTRAL_POSITION+250;//position where it is folded
+int LEFT_POSITION = FOLDED_POSITION-PULL_OFFSET;//position where it is actuating to the left
+int RIGHT_POSITION = FOLDED_POSITION+PULL_OFFSET;//position where it is actuating to the right
 const int DIGITAL_PIN = 9;
 const int analogOutPin = A3; //analog Pin is the pin that shows the position of the servo horn. It is NOT from 0 to 1023, but rather 0 to around 500
 const int clockwiseSpeed = 0; //speed input in the digital Pin so that the horn turns clockwise
