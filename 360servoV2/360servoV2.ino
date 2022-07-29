@@ -67,7 +67,7 @@ void loop()
     }*/
     //else
     {
-      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30,30); //always move counter clockwise to the neutral position at the beginning
+      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30); //always move counter clockwise to the neutral position at the beginning
       delay(100);
       myservo.write(100);
       //delay(2000);
@@ -83,8 +83,7 @@ void loop()
 
   if (stage == FOLDING) // state the folding state
   {
-
-    moveToPosition(FOLDED_POSITION, "counterclockwise",50,50); //move to the counter clockwise to the folded position from the unfolded position
+    moveToPosition(FOLDED_POSITION, "counterclockwise",50); //move to the counter clockwise to the folded position from the unfolded position
     myservo.write(stopSpeed);
     Serial.println("Folded");
     Serial.print("\t Analog at Folded= ");
@@ -105,13 +104,13 @@ void loop()
   {
 
 
-    moveToPosition(LEFT_POSITION, "clockwise",70,55); //move to left pos
+    moveToPosition(LEFT_POSITION, "clockwise",55); //move to left pos
     myservo.write(stopSpeed);
     Serial.println("moved Left");
     moves++;
     if (moves >= 40 && moves <=50) //testing range for left actuation
     {
-      moveToPosition(FOLDED_POSITION, "counterclockwise", 30,30);
+      moveToPosition(FOLDED_POSITION, "counterclockwise", 30);
       myservo.write(stopSpeed);
       Serial.println("movedToCenter");
     }
@@ -126,7 +125,7 @@ void loop()
   if (stage == RIGHT) 
   {
 
-    moveToPosition(RIGHT_POSITION, "counterclockwise", 55,70);
+    moveToPosition(RIGHT_POSITION, "counterclockwise", 55);
     myservo.write(stopSpeed);
     Serial.println("moved right");
     moves++;
@@ -134,7 +133,7 @@ void loop()
     //delay(2000);
     if (moves > 50 && moves <=60) //testing range for right actuation
     {
-      moveToPosition(FOLDED_POSITION, "clockwise", 30,30);
+      moveToPosition(FOLDED_POSITION, "clockwise", 30);
       myservo.write(stopSpeed);
       Serial.println("movedToCenter");
     }
@@ -151,7 +150,7 @@ void loop()
   }
   if (stage == DONE)
   {
-    moveToPosition(NEUTRAL_POSITION, "clockwise",50,50); //move clockwise to neutral positon to return to unfolded state
+    moveToPosition(NEUTRAL_POSITION, "clockwise",30); //move clockwise to neutral positon to return to unfolded state
     delay(100);
     myservo.write(stopSpeed);
     moves = 0;
@@ -172,11 +171,30 @@ void loop()
 }
 
 
-void moveToPosition(int positionValue, String rotationDirection, int errorRange1, int errorRange2)
+void moveToPosition(int positionValue, String rotationDirection, int errorRange1)
 {//this is the main function to move to a designated position as called in the state machine
   //the error range is so that in the case the analog Read is not updated fast enough, the servo horn can still stop around the designated position as noted in the function
   location = readAnalog(); //update location of servo horn using analog reader
-  while (location < positionValue - errorRange1 || location > positionValue + errorRange2)
+
+  if (rotationDirection.equals("clockwise"))
+  {
+      while(location > positionValue+errorRange1)
+        {
+          location = readAnalog();
+          myservo.write(clockwiseSpeed);
+          Serial.println("ROTATING CLOCKWISE");
+        }
+  }
+
+  if (rotationDirection.equals("counterclockwise"))
+      while(location > positionValue-errorRange1)
+        {
+          location = readAnalog();
+          myservo.write(counterclockwiseSpeed);
+          Serial.println("ROTATING COUNTERCLOCKWISE");
+        }
+    location=readAnalog();
+ /* while (location < positionValue - errorRange1 || location > positionValue + errorRange2)
   {
     if (rotationDirection.equals("clockwise"))
     {
@@ -191,9 +209,11 @@ void moveToPosition(int positionValue, String rotationDirection, int errorRange1
       myservo.write(counterclockwiseSpeed); //if rotating counterclockwise set digital pin to counterclockwise value
       Serial.println("ROTATING COUNTERCLOCKWISE");
     }
+
     location = readAnalog();
     //delay(100);
-  }
+  }*/
+
   //delay(100);
   //myservo.write(stopSpeed);
 
