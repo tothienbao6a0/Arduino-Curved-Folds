@@ -4,10 +4,10 @@ Servo myservo;
 //digital pin controls the velocity
 //analog pin shows the position of the servo 
 //therefore, to move from one position to another, the move function must designates the desired analog value, the rotation position, and the error range to help check for accurate movement
-
+//translate from 0 to 478 to 0 to 360
 int NEUTRAL_POSITION = 45;//position where it is unfolded (can be changed)
-int PULL_OFFSET = 110;//how much it actuates in each direction during the folded state
-int FOLDED_POSITION = NEUTRAL_POSITION+250;//position where it is folded
+int PULL_OFFSET = 90;//how much it actuates in each direction during the folded state
+int FOLDED_POSITION = NEUTRAL_POSITION+280;//position where it is folded
 int LEFT_POSITION = FOLDED_POSITION-PULL_OFFSET;//position where it is actuating to the left
 int RIGHT_POSITION = FOLDED_POSITION+PULL_OFFSET;//position where it is actuating to the right
 const int DIGITAL_PIN = 9;
@@ -67,7 +67,7 @@ void loop()
     }*/
     //else
     {
-      moveToPosition(NEUTRAL_POSITION , "counterclockwise",30); //always move counter clockwise to the neutral position at the beginning
+      moveToPosition(NEUTRAL_POSITION , "counterclockwise",40); //always move counter clockwise to the neutral position at the beginning
       delay(100);
       myservo.write(100);
       //delay(2000);
@@ -83,7 +83,7 @@ void loop()
 
   if (stage == FOLDING) // state the folding state
   {
-    moveToPosition(FOLDED_POSITION, "counterclockwise",50); //move to the counter clockwise to the folded position from the unfolded position
+    moveToPosition(FOLDED_POSITION, "counterclockwise",40); //move to the counter clockwise to the folded position from the unfolded position
     myservo.write(stopSpeed);
     Serial.println("Folded");
     Serial.print("\t Analog at Folded= ");
@@ -104,13 +104,13 @@ void loop()
   {
 
 
-    moveToPosition(LEFT_POSITION, "clockwise",55); //move to left pos
+    moveToPosition(LEFT_POSITION, "clockwise",40); //move to left pos
     myservo.write(stopSpeed);
     Serial.println("moved Left");
     moves++;
-    if (moves >= 40 && moves <=50) //testing range for left actuation
+    if (moves >= 10 && moves <=20) //testing range for left actuation
     {
-      moveToPosition(FOLDED_POSITION, "counterclockwise", 30);
+      moveToPosition(FOLDED_POSITION, "counterclockwise", 0);
       myservo.write(stopSpeed);
       Serial.println("movedToCenter");
     }
@@ -125,15 +125,15 @@ void loop()
   if (stage == RIGHT) 
   {
 
-    moveToPosition(RIGHT_POSITION, "counterclockwise", 55);
+    moveToPosition(RIGHT_POSITION, "counterclockwise", 0);
     myservo.write(stopSpeed);
     Serial.println("moved right");
     moves++;
     
     //delay(2000);
-    if (moves > 50 && moves <=60) //testing range for right actuation
+    if (moves > 20 && moves <=30) //testing range for right actuation
     {
-      moveToPosition(FOLDED_POSITION, "clockwise", 30);
+      moveToPosition(FOLDED_POSITION, "clockwise",40);
       myservo.write(stopSpeed);
       Serial.println("movedToCenter");
     }
@@ -150,7 +150,7 @@ void loop()
   }
   if (stage == DONE)
   {
-    moveToPosition(NEUTRAL_POSITION, "clockwise",30); //move clockwise to neutral positon to return to unfolded state
+    moveToPosition(NEUTRAL_POSITION, "clockwise",40); //move clockwise to neutral positon to return to unfolded state
     delay(100);
     myservo.write(stopSpeed);
     moves = 0;
@@ -160,7 +160,7 @@ void loop()
     moves = 0; 
   }
 
-  if (moves > 70) //if moved more than 70 times, return to neutral position
+  if (moves > 50) //if moved more than 70 times, return to neutral position
   {
 
     actuationCompleted = true;
@@ -178,21 +178,27 @@ void moveToPosition(int positionValue, String rotationDirection, int errorRange1
 
   if (rotationDirection.equals("clockwise"))
   {
-      while(location > positionValue+errorRange1)
+      while(readAnalog() > positionValue+errorRange1)
         {
-          location = readAnalog();
+         // location = readAnalog();
           myservo.write(clockwiseSpeed);
           Serial.println("ROTATING CLOCKWISE");
         }
+      myservo.write(100);
+      Serial.println("DONE ROTATION!");
   }
 
   if (rotationDirection.equals("counterclockwise"))
-      while(location > positionValue-errorRange1)
+  {
+      while(readAnalog() < positionValue-errorRange1)
         {
-          location = readAnalog();
+        //  location = readAnalog();
           myservo.write(counterclockwiseSpeed);
           Serial.println("ROTATING COUNTERCLOCKWISE");
         }
+       myservo.write(100);
+       Serial.println("DONE ROTATION!");
+  }
     location=readAnalog();
  /* while (location < positionValue - errorRange1 || location > positionValue + errorRange2)
   {
